@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import {
@@ -29,6 +32,6 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('agriledger-api');
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(process.env.BACKEND_PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();
