@@ -1,4 +1,11 @@
-import { Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { PropriedadeModel } from './propriedade.model';
 import { CulturaModel } from './cultura.model';
 

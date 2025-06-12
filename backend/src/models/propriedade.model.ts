@@ -1,4 +1,11 @@
-import { Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { ProdutorModel } from './produtor.model';
 import { SafraModel } from './safra.model';
 
