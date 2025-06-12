@@ -6,11 +6,12 @@ import { CulturaModel } from '../models/cultura.model';
 
 export const sequelizeConfig: SequelizeOptions = {
   dialect: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 5432,
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASS || 'postgres',
-  database: process.env.DB_NAME || 'agri_ledger',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   logging: false,
   models: [ProdutorModel, PropriedadeModel, SafraModel, CulturaModel],
+  sync: { force: false }, // Cria tabelas se não existirem (não apaga dados)
 };

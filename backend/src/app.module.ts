@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { sequelizeConfig } from './database/orm.config';
-import { AppController } from './controllers/app.controller';
-import { AppService } from './services/app.service';
 import { ProdutorController } from './controllers/produtor.controller';
 import { ProdutorService } from './services/produtor.service';
 import { ProdutorModel } from './models/produtor.model';
@@ -27,14 +25,12 @@ import { CulturaModel } from './models/cultura.model';
     ]),
   ],
   controllers: [
-    AppController,
     ProdutorController,
     PropriedadeController,
     SafraController,
     CulturaController,
   ],
   providers: [
-    AppService,
     ProdutorService,
     PropriedadeService,
     SafraService,
