@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CulturaService } from '../services/cultura.service';
 import { CreateCulturaDto } from '../dtos/create-cultura.dto';
 import { UpdateCulturaDto } from '../dtos/update-cultura.dto';

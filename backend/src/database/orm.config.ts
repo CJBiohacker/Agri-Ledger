@@ -1,4 +1,8 @@
 import { SequelizeOptions } from 'sequelize-typescript';
+import { ProdutorModel } from '../models/produtor.model';
+import { PropriedadeModel } from '../models/propriedade.model';
+import { SafraModel } from '../models/safra.model';
+import { CulturaModel } from '../models/cultura.model';
 
 export const sequelizeConfig: SequelizeOptions = {
   dialect: 'postgres',
@@ -8,4 +12,5 @@ export const sequelizeConfig: SequelizeOptions = {
   password: process.env.DB_PASS || 'postgres',
   database: process.env.DB_NAME || 'agri_ledger',
   logging: false,
+  models: [ProdutorModel, PropriedadeModel, SafraModel, CulturaModel],
 };
