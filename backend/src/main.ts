@@ -11,12 +11,27 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
 import { API_PREFIX } from './constants';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
+    { logger: ['log', 'error', 'warn', 'debug', 'verbose'] },
   );
+
+  // Middleware de log de requisições HTTP
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      const ms = Date.now() - start;
+      Logger.log(
+        `${req.method} ${req.url} ${res.statusCode} - ${ms}ms`,
+        'HTTP',
+      );
+    });
+    next();
+  });
 
   // Segurança: headers HTTP
   await app.register(helmet);

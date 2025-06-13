@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
 
@@ -41,6 +42,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: request?.url,
       message,
     };
+
+    // Log detalhado do erro
+    Logger.error(
+      `Erro ${status} em ${request?.method} ${request?.url}: ${message}`,
+      exception?.stack,
+      'AllExceptionsFilter',
+    );
 
     // Detecta se é Fastify ou Express
     if (
