@@ -63,12 +63,23 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`${API_PREFIX}/docs`, app, document);
+
+  // Para Fastify, o prefixo global não é automaticamente aplicado ao Swagger.
+  // Portanto, especificamos o caminho completo desejado aqui.
+  const swaggerPath = API_PREFIX.startsWith('/')
+    ? `${API_PREFIX.substring(1)}/docs`
+    : `${API_PREFIX}/docs`;
+  SwaggerModule.setup(swaggerPath, app, document);
 
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
+
+  // Garante que a URL de log não tenha barras duplicadas
+  const cleanApiPrefixForLog = API_PREFIX.startsWith('/')
+    ? API_PREFIX
+    : `/${API_PREFIX}`;
   Logger.log(
-    `🚀 Aplicação rodando em: http://localhost:${port}/${API_PREFIX}/docs`,
+    `🚀 Aplicação rodando em: http://localhost:${port}${cleanApiPrefixForLog}/docs`,
     'Bootstrap',
   );
 }
