@@ -1,12 +1,14 @@
 # Agri-Ledger API
 
 ## Visão Geral
-O Agri-Ledger API é o backend para um sistema de gestão de produtores rurais, suas propriedades, safras e culturas. O objetivo é fornecer uma plataforma robusta, escalável e segura para registrar e gerenciar informações agrícolas, facilitando a rastreabilidade e a tomada de decisões.
+
+O Agri-Ledger API é o backend para um sistema de gestão de produtores rurais, suas propriedades, safras e culturas. O objetivo é fornecer uma plataforma robusta, escalável e segura para registrar e gerenciar informações agrícolas, incluindo a capacidade de associar múltiplas culturas a uma única safra por propriedade, facilitando a rastreabilidade e a tomada de decisões.
 
 ## Tecnologias Utilizadas
+
 - **Backend:** Node.js, NestJS, TypeScript
 - **Banco de Dados:** PostgreSQL
-- **ORM:** Sequelize
+- **ORM:** Sequelize (com PKs UUID para entidades principais)
 - **Testes:** Jest (para testes unitários e de integração/e2e)
 - **Contêinerização:** Docker
 - **Linting e Formatação:** ESLint, Prettier
@@ -14,37 +16,145 @@ O Agri-Ledger API é o backend para um sistema de gestão de produtores rurais, 
 - **Documentação da API:** Swagger (OpenAPI) via `@nestjs/swagger`
 
 ## Arquitetura
+
 A API segue uma arquitetura em camadas, comum em aplicações NestJS, promovendo separação de responsabilidades e modularidade:
+
 - **Controllers:** Responsáveis por lidar com as requisições HTTP, validar dados de entrada (usando DTOs) e retornar respostas.
 - **Services:** Contêm a lógica de negócio principal da aplicação.
-- **Models/Repositories:** Camada de acesso a dados, utilizando Sequelize para interagir com o banco de dados PostgreSQL.
+- **Models/Repositories:** Camada de acesso a dados, utilizando Sequelize para interagir com o banco de dados PostgreSQL. As entidades principais (`Produtor`, `Propriedade`, `Safra`, `Cultura`, `Plantio`) utilizam UUID como chaves primárias.
 - **Modules:** Agrupam componentes relacionados (controllers, services, models) por funcionalidade.
 
-*Diagramas de arquitetura e fluxo de dados podem ser adicionados à pasta `/docs/diagrams` para visualização detalhada.*
+_Diagramas de arquitetura e fluxo de dados podem ser adicionados à pasta `/docs/diagrams` para visualização detalhada._
+
+## Modelo de Dados Detalhado
+
+A API Agri-Ledger utiliza um modelo de dados relacional para gerenciar as informações agrícolas. As chaves primárias de todas as entidades principais são do tipo UUID para garantir identificadores únicos e distribuídos.
+
+### Entidades Principais e Relacionamentos
+
+```mermaid
+erDiagram
+    PRODUTORES {
+        UUID id PK
+        String nome
+        String documento
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    PROPRIEDADES {
+        UUID id PK
+        UUID produtorId FK
+        String nome
+        String localizacao
+        Float areaTotal
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    SAFRAS {
+        UUID id PK
+        UUID propriedadeId FK
+        String nome
+        Date dataInicio
+        Date dataFim
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    CULTURAS {
+        UUID id PK
+        String nome
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    PLANTIOS {
+        UUID id PK
+        UUID propriedadeId FK
+        UUID safraId FK
+        UUID culturaId FK
+        Float areaPlantada
+        Date dataPlantio
+        Date dataColheitaEstimada
+        Date dataColheitaRealizada
+        Float quantidadeColhida
+        DateTime createdAt
+        DateTime updatedAt
+    }
+
+    PRODUTORES ||--o{ PROPRIEDADES : "possui"
+    PROPRIEDADES ||--o{ SAFRAS : "tem"
+    PROPRIEDADES ||--o{ PLANTIOS : "contém"
+    SAFRAS ||--o{ PLANTIOS : "registra"
+    CULTURAS ||--o{ PLANTIOS : "é cultivada em"
+```
+
+**Descrições das Entidades:**
+
+- **Produtores (`produtores`)**: Armazena informações sobre os produtores rurais.
+  - `id`: UUID, Chave Primária.
+  - `nome`: Nome do produtor.
+  - `documento`: Documento (CPF/CNPJ), único.
+- **Propriedades (`propriedades`)**: Representa as propriedades pertencentes aos produtores.
+  - `id`: UUID, Chave Primária.
+  - `produtorId`: UUID, Chave Estrangeira referenciando `produtores.id`.
+  - `nome`: Nome da propriedade.
+  - `localizacao`: Descrição textual ou coordenadas da localização.
+  - `areaTotal`: Área total da propriedade em hectares.
+- **Safras (`safras`)**: Define os períodos de safra para cada propriedade.
+  - `id`: UUID, Chave Primária.
+  - `propriedadeId`: UUID, Chave Estrangeira referenciando `propriedades.id`.
+  - `nome`: Nome/identificador da safra (ex: "Safra Soja 2024/2025").
+  - `dataInicio`: Data de início da safra.
+  - `dataFim`: Data de término da safra.
+- **Culturas (`culturas`)**: Tabela de lookup para os tipos de culturas (ex: Soja, Milho, Café).
+  - `id`: UUID, Chave Primária.
+  - `nome`: Nome da cultura, único.
+- **Plantios (`plantios`)**: Tabela de junção que registra o plantio de uma cultura específica, em uma determinada área de uma propriedade, durante uma safra.
+  - `id`: UUID, Chave Primária.
+  - `propriedadeId`: UUID, Chave Estrangeira referenciando `propriedades.id`.
+  - `safraId`: UUID, Chave Estrangeira referenciando `safras.id`.
+  - `culturaId`: UUID, Chave Estrangeira referenciando `culturas.id`.
+  - `areaPlantada`: Área plantada com a cultura em hectares.
+  - `dataPlantio`: Data em que o plantio foi realizado.
+  - `dataColheitaEstimada`: Data estimada para a colheita.
+  - `dataColheitaRealizada`: Data real da colheita (opcional).
+  - `quantidadeColhida`: Quantidade colhida (opcional).
+
+Este modelo permite que uma `Propriedade` tenha múltiplas `Safras`, e dentro de cada `Safra` em uma `Propriedade`, múltiplos `Plantios` de diferentes `Culturas` podem ser registrados, cada um com sua `areaPlantada` específica.
 
 ## Como Começar
 
 ### Pré-requisitos
+
 - Node.js (versão >= 18.x recomendada)
 - Yarn ou NPM
 - Docker e Docker Compose (para ambiente de desenvolvimento com banco de dados)
 - PostgreSQL (se não for utilizar Docker para o banco)
 
 ### Configuração do Ambiente
-1.  **Clone o repositório:**
+
+1. **Clone o repositório:**
+
     ```bash
     git clone https://github.com/seu-usuario/agri-ledger.git
     cd agri-ledger/backend
     ```
-2.  **Instale as dependências:**
+
+2. **Instale as dependências:**
+
     ```bash
     npm install
     # ou
     # yarn install
     ```
-3.  **Configure as variáveis de ambiente:**
+
+3. **Configure as variáveis de ambiente:**
+
     - Copie o arquivo `.env.example` (se existir) para `.env` na pasta `backend`.
     - Preencha as variáveis de ambiente necessárias, como:
+
       ```env
       # Configurações da Aplicação
       PORT=3000
@@ -62,29 +172,49 @@ A API segue uma arquitetura em camadas, comum em aplicações NestJS, promovendo
       JWT_SECRET=seu_segredo_jwt
       API_KEY=sua_api_key_segura
       ```
-    *Nota: Para produção, utilize segredos gerenciados (ex: Google Secret Manager).*
 
-4.  **(Opcional) Suba o banco de dados com Docker Compose:**
+    _Nota: Para produção, utilize segredos gerenciados (ex: Google Secret Manager)._
+
+4. **(Opcional) Suba o banco de dados com Docker Compose:**
+
     Se houver um `docker-compose.yml` configurado para o banco:
+
     ```bash
     docker-compose up -d postgres_db # Substitua 'postgres_db' pelo nome do serviço do banco no docker-compose.yml
     ```
+
     Caso contrário, certifique-se de que uma instância do PostgreSQL esteja rodando e acessível.
 
-5.  **Rode as migrations do Sequelize (se configuradas):**
+5. **Rode as migrations do Sequelize:**
+
+    Antes de rodar as migrations, se você possuía uma versão anterior do banco de dados desta aplicação, será necessário limpar as tabelas existentes, pois a estrutura foi significativamente alterada (incluindo a mudança de chaves primárias para UUID e a introdução da tabela `Plantio`).
+
+    ```bash
+    # Conecte-se ao seu PostgreSQL e execute os comandos DROP TABLE para as tabelas antigas se necessário.
+    # Ex: DROP TABLE IF EXISTS plantios, culturas, safras, propriedades, produtores, "SequelizeMeta";
+    ```
+
+    Com o banco de dados limpo (ou para uma nova configuração), execute a migration para criar o schema:
+
     ```bash
     npm run migration:run
     ```
 
+    Este comando criará todas as tabelas necessárias (`produtores`, `propriedades`, `safras`, `culturas`, `plantios`) com a nova estrutura.
+
 ### Rodando a Aplicação
+
 ```bash
 npm run start:dev
 ```
+
 A aplicação estará disponível em `http://localhost:PORTA_CONFIGURADA` (ex: `http://localhost:3000`).
 A documentação Swagger da API estará acessível em `http://localhost:PORTA_CONFIGURADA/api-docs`.
 
 ## Estrutura do Projeto (Backend)
+
 A pasta `backend` contém a aplicação NestJS:
+
 ```
 backend/
 ├── dist/                     # Arquivos compilados (JavaScript)
@@ -94,11 +224,11 @@ backend/
 │   ├── app.module.ts         # Módulo raiz da aplicação
 │   ├── common/               # Utilitários, filtros globais, interceptors, etc.
 │   │   └── all-exceptions.filter.ts # Exemplo de filtro de exceção global
-│   ├── controllers/          # Controladores (ex: produtor.controller.ts)
-│   ├── services/             # Serviços com a lógica de negócio
-│   ├── models/               # Modelos/Entidades do Sequelize
-│   ├── dtos/                 # Data Transfer Objects para validação
-│   ├── database/             # Configuração do banco (orm.config.ts) e migrations
+│   ├── controllers/          # Controladores (ex: produtor.controller.ts, plantio.controller.ts)
+│   ├── services/             # Serviços com a lógica de negócio (ex: produtor.service.ts, plantio.service.ts)
+│   ├── models/               # Modelos/Entidades do Sequelize (ex: produtor.model.ts, plantio.model.ts)
+│   ├── dtos/                 # Data Transfer Objects para validação (ex: create-produtor.dto.ts, create-plantio.dto.ts)
+│   ├── database/             # Configuração do banco (orm.config.ts) e migrations (contém a migration do schema inicial)
 │   ├── interfaces/           # Interfaces TypeScript
 │   └── utils/                # Funções utilitárias
 ├── test/                     # Testes automatizados
@@ -117,28 +247,85 @@ backend/
 ```
 
 ## Endpoints da API (Documentação OpenAPI/Swagger)
-A documentação interativa da API, gerada com Swagger (OpenAPI), está disponível na rota `/api-docs` quando a aplicação está em execução.
+
+A documentação interativa completa da API, gerada com Swagger (OpenAPI), está disponível na rota `/api-docs` quando a aplicação está em execução.
 Exemplo: `http://localhost:3000/api-docs`
 
-Esta documentação detalha todos os endpoints disponíveis, seus parâmetros, corpos de requisição/resposta e códigos de status.
+Esta documentação detalha todos os endpoints disponíveis, seus parâmetros, corpos de requisição/resposta, modelos de dados e códigos de status.
+
+### Resumo dos Principais Endpoints
+
+Todos os IDs de recursos nas rotas (ex: `/:id`) são UUIDs.
+
+**Produtores (`/produtores`)**
+
+- `POST /` - Cria um novo produtor.
+- `GET /` - Lista todos os produtores.
+- `GET /:id` - Busca um produtor pelo ID.
+- `PUT /:id` - Atualiza um produtor.
+- `DELETE /:id` - Remove um produtor.
+
+**Propriedades (`/propriedades`)**
+
+- `POST /` - Cria uma nova propriedade (requer `produtorId`).
+- `GET /` - Lista todas as propriedades (pode incluir filtros).
+- `GET /:id` - Busca uma propriedade pelo ID (inclui produtor, safras e plantios associados).
+- `PUT /:id` - Atualiza uma propriedade.
+- `DELETE /:id` - Remove uma propriedade.
+
+**Safras (`/safras`)**
+
+- `POST /` - Cria uma nova safra (requer `propriedadeId`).
+- `GET /` - Lista todas as safras (pode incluir filtros).
+- `GET /:id` - Busca uma safra pelo ID (inclui propriedade e plantios associados).
+- `PUT /:id` - Atualiza uma safra.
+- `DELETE /:id` - Remove uma safra.
+
+**Culturas (`/culturas`)**
+
+- `POST /` - Cria uma nova cultura.
+- `GET /` - Lista todas as culturas.
+- `GET /:id` - Busca uma cultura pelo ID.
+- `PUT /:id` - Atualiza uma cultura.
+- `DELETE /:id` - Remove uma cultura.
+
+**Plantios (`/plantios`)**
+
+- `POST /` - Cria um novo registro de plantio (requer `propriedadeId`, `safraId`, `culturaId`).
+- `GET /` - Lista todos os plantios (pode incluir filtros).
+- `GET /:id` - Busca um plantio pelo ID (inclui propriedade, safra e cultura associadas).
+- `PUT /:id` - Atualiza um registro de plantio.
+- `DELETE /:id` - Remove um registro de plantio.
+
+Para detalhes sobre os DTOs de requisição e resposta, e possíveis parâmetros de consulta, consulte a documentação Swagger em `/api-docs`.
 
 ## Testes
+
 O projeto utiliza Jest para testes unitários e de integração.
+
 - **Rodar todos os testes (unitários e e2e):**
+
   ```bash
   npm run test
   ```
+
 - **Rodar testes e gerar relatório de cobertura:**
+
   ```bash
   npm run test:cov
   ```
+
   O relatório de cobertura será gerado na pasta `coverage/lcov-report/index.html`.
+
 - **Rodar apenas os testes de integração (e2e):**
+
   ```bash
   npm run test:e2e
   ```
+
 - **Rodar apenas os testes unitários:**
   (Pode ser necessário configurar um script específico ou usar o Jest CLI diretamente)
+
   ```bash
   npm run test:unit # Se configurado no package.json, ou:
   # jest --config jest.config.js src # Exemplo, ajuste conforme necessário
@@ -147,30 +334,41 @@ O projeto utiliza Jest para testes unitários e de integração.
 ## Build e Deploy
 
 ### Build com Docker
-1.  Navegue até a pasta `backend`.
-2.  Construa a imagem Docker:
+
+1. Navegue até a pasta `backend`.
+2. Construa a imagem Docker:
+
     ```bash
     docker build -t agri-ledger-api:latest .
     ```
 
 ### Deploy no Google Cloud Run
-1.  **Autentique-se no Google Cloud:**
+
+1. **Autentique-se no Google Cloud:**
+
     ```bash
     gcloud auth login
     gcloud auth configure-docker
     ```
-2.  **Defina o ID do seu projeto Google Cloud:**
+
+2. **Defina o ID do seu projeto Google Cloud:**
+
     ```bash
     export PROJECT_ID="seu-gcp-project-id"
     gcloud config set project $PROJECT_ID
     ```
-3.  **Construa e envie a imagem para o Artifact Registry (ou Container Registry):**
+
+3. **Construa e envie a imagem para o Artifact Registry (ou Container Registry):**
+
     (Assumindo que você tem um repositório Docker chamado `agri-ledger-repo` na região `us-central1`)
+
     ```bash
     docker tag agri-ledger-api:latest us-central1-docker.pkg.dev/$PROJECT_ID/agri-ledger-repo/agri-ledger-api:latest
     docker push us-central1-docker.pkg.dev/$PROJECT_ID/agri-ledger-repo/agri-ledger-api:latest
     ```
-4.  **Faça o deploy no Cloud Run:**
+
+4. **Faça o deploy no Cloud Run:**
+
     ```bash
     gcloud run deploy agri-ledger-service \
       --image us-central1-docker.pkg.dev/$PROJECT_ID/agri-ledger-repo/agri-ledger-api:latest \
@@ -180,9 +378,11 @@ O projeto utiliza Jest para testes unitários e de integração.
       --port 8080 \ # Porta que o Cloud Run expõe, o Dockerfile deve expor a porta da aplicação (ex: 3000)
       --set-env-vars NODE_ENV=production,PORT=3000,DB_HOST=...,DB_PORT=...,DB_USERNAME=...,DB_PASSWORD=...,DB_DATABASE=... # E outras variáveis de ambiente
     ```
-    *Importante: Para `DB_HOST` no Cloud Run, configure o IP da instância do Cloud SQL ou use o Socket de Conexão do Cloud SQL. As senhas e segredos devem ser gerenciados via Secret Manager e referenciados nas variáveis de ambiente do Cloud Run.*
+
+    _Importante: Para `DB_HOST` no Cloud Run, configure o IP da instância do Cloud SQL ou use o Socket de Conexão do Cloud SQL. As senhas e segredos devem ser gerenciados via Secret Manager e referenciados nas variáveis de ambiente do Cloud Run._
 
 ## Scripts Úteis (definidos em `package.json`)
+
 - `npm run build`: Compila o código TypeScript para JavaScript.
 - `npm run format`: Formata o código usando Prettier.
 - `npm run start`: Executa a aplicação em modo de produção (após o build).
@@ -194,19 +394,22 @@ O projeto utiliza Jest para testes unitários e de integração.
 - `npm run test:cov`: Roda os testes e gera o relatório de cobertura.
 - `npm run test:debug`: Roda os testes em modo de debug.
 - `npm run test:e2e`: Roda especificamente os testes e2e.
-- `npm run migration:generate <path/to/MigrationName>`: Gera um novo arquivo de migration do Sequelize (ex: `npm run migration:generate src/database/migrations/CreateUsersTable`).
-- `npm run migration:run`: Aplica as migrations pendentes no banco de dados.
+- `npm run migration:generate <path/to/MigrationName>`: Gera um novo arquivo de migration do Sequelize (ex: `npm run migration:generate src/database/migrations/AlterTableAddColumn`).
+- `npm run migration:run`: Aplica as migrations pendentes. Para uma nova configuração, cria o schema inicial.
 - `npm run migration:revert`: Reverte a última migration aplicada.
 
 ## Contribuição
+
 Contribuições são bem-vindas! Por favor, siga estas diretrizes:
-1.  Faça um fork do projeto.
-2.  Crie uma branch para sua feature (`git checkout -b feature/nova-feature`).
-3.  Faça commit de suas mudanças (`git commit -am 'Adiciona nova feature'`).
-4.  Faça push para a branch (`git push origin feature/nova-feature`).
-5.  Abra um Pull Request.
+
+1. Faça um fork do projeto.
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`).
+3. Faça commit de suas mudanças (`git commit -am 'Adiciona nova feature'`).
+4. Faça push para a branch (`git push origin feature/nova-feature`).
+5. Abra um Pull Request.
 
 Certifique-se de que os testes passam e que o código segue os padrões de linting.
 
 ## Licença
+
 Este projeto é licenciado sob a Licença MIT. Veja o arquivo `LICENSE` na raiz do projeto para mais detalhes.
