@@ -13,6 +13,7 @@ import { SafraModel } from './models/safra.model';
 import { CulturaController } from './controllers/cultura.controller';
 import { CulturaService } from './services/cultura.service';
 import { CulturaModel } from './models/cultura.model';
+import { PlantioModel } from './models/plantio.model';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CulturaModel } from './models/cultura.model';
       PropriedadeModel,
       SafraModel,
       CulturaModel,
+      PlantioModel,
     ]),
   ],
   controllers: [

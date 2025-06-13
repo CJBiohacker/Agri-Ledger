@@ -1,11 +1,5 @@
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
-import { SafraModel } from './safra.model';
+import { Column, DataType, Model, Table, HasMany } from 'sequelize-typescript';
+import { PlantioModel } from './plantio.model';
 
 @Table({ tableName: 'culturas', timestamps: true })
 export class CulturaModel extends Model<CulturaModel> {
@@ -17,32 +11,17 @@ export class CulturaModel extends Model<CulturaModel> {
   })
   id: number;
 
-  @ForeignKey(() => SafraModel)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-    field: 'safraid',
-  })
-  safraId: number;
-
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    unique: true, // Nome da cultura deve ser único (Soja, Milho, etc.)
     field: 'nome',
   })
   nome: string; // Ex: Soja, Milho, Café
 
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'createdat',
-  })
-  declare createdAt: Date;
+  // Relação com a tabela de junção PlantioModel
+  @HasMany(() => PlantioModel)
+  plantios: PlantioModel[];
 
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'updatedat',
-  })
-  declare updatedAt: Date;
+  // Timestamps padrão do Sequelize (createdAt e updatedAt) são gerenciados automaticamente
 }

@@ -2,12 +2,13 @@ import {
   Column,
   DataType,
   ForeignKey,
-  HasMany,
   Model,
   Table,
+  BelongsTo,
+  HasMany, // Será usado para o modelo de junção PlantioModel
 } from 'sequelize-typescript';
 import { PropriedadeModel } from './propriedade.model';
-import { CulturaModel } from './cultura.model';
+import { PlantioModel } from './plantio.model'; // Será criado
 
 @Table({ tableName: 'safras', timestamps: true })
 export class SafraModel extends Model<SafraModel> {
@@ -27,27 +28,33 @@ export class SafraModel extends Model<SafraModel> {
   })
   propriedadeId: number;
 
+  @BelongsTo(() => PropriedadeModel)
+  propriedade: PropriedadeModel;
+
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    field: 'nome',
+    field: 'nome', // Ex: Safra Verão 2023/2024, Colheita Principal 2024
   })
-  nome: string; // Ex: Safra 2021
-
-  @HasMany(() => CulturaModel)
-  culturas: CulturaModel[];
+  nome: string;
 
   @Column({
-    type: DataType.DATE,
+    type: DataType.DATEONLY,
     allowNull: false,
-    field: 'createdat',
+    field: 'data_inicio',
   })
-  declare createdAt: Date;
+  dataInicio: string; // Formato YYYY-MM-DD
 
   @Column({
-    type: DataType.DATE,
+    type: DataType.DATEONLY,
     allowNull: false,
-    field: 'updatedat',
+    field: 'data_fim',
   })
-  declare updatedAt: Date;
+  dataFim: string; // Formato YYYY-MM-DD
+
+  // Relação com a tabela de junção PlantioModel
+  @HasMany(() => PlantioModel)
+  plantios: PlantioModel[];
+
+  // Timestamps padrão do Sequelize (createdAt e updatedAt) são gerenciados automaticamente
 }

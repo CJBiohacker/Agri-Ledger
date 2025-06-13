@@ -5,9 +5,11 @@ import {
   HasMany,
   Model,
   Table,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { ProdutorModel } from './produtor.model';
 import { SafraModel } from './safra.model';
+import { PlantioModel } from './plantio.model';
 
 @Table({ tableName: 'propriedades', timestamps: true })
 export class PropriedadeModel extends Model<PropriedadeModel> {
@@ -26,6 +28,9 @@ export class PropriedadeModel extends Model<PropriedadeModel> {
     field: 'produtorid',
   })
   produtorId: number;
+
+  @BelongsTo(() => ProdutorModel)
+  produtor: ProdutorModel;
 
   @Column({
     type: DataType.STRING,
@@ -72,17 +77,6 @@ export class PropriedadeModel extends Model<PropriedadeModel> {
   @HasMany(() => SafraModel)
   safras: SafraModel[];
 
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'createdat',
-  })
-  declare createdAt: Date;
-
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'updatedat',
-  })
-  declare updatedAt: Date;
+  @HasMany(() => PlantioModel)
+  plantios: PlantioModel[];
 }
