@@ -1,10 +1,12 @@
 import {
-  Column,
-  DataType,
-  ForeignKey,
-  HasMany,
-  Model,
   Table,
+  Column,
+  Model,
+  DataType,
+  HasMany,
+  PrimaryKey,
+  Default,
+  ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
 import { ProdutorModel } from './produtor.model';
@@ -13,21 +15,17 @@ import { PlantioModel } from './plantio.model';
 
 @Table({ tableName: 'propriedades', timestamps: true })
 export class PropriedadeModel extends Model<PropriedadeModel> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
   @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-    field: 'id',
+    type: DataType.UUID,
+    allowNull: false,
   })
-  id: number;
+  id: string;
 
   @ForeignKey(() => ProdutorModel)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-    field: 'produtorid',
-  })
-  produtorId: number;
+  @Column({ type: DataType.UUID, allowNull: false })
+  produtorId: string;
 
   @BelongsTo(() => ProdutorModel)
   produtor: ProdutorModel;

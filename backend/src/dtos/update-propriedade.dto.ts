@@ -1,9 +1,9 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class UpdatePropriedadeDto {
   @IsOptional()
-  @IsNumber()
-  produtorId?: number;
+  @IsUUID()
+  produtorId?: string;
 
   @IsOptional()
   @IsString()

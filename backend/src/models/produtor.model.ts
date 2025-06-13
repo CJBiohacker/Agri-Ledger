@@ -1,15 +1,23 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  HasMany,
+  Model,
+  Table,
+  PrimaryKey,
+  Default,
+} from 'sequelize-typescript';
 import { PropriedadeModel } from './propriedade.model';
 
 @Table({ tableName: 'produtores', timestamps: true })
 export class ProdutorModel extends Model<ProdutorModel> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
   @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-    field: 'id',
+    type: DataType.UUID,
+    allowNull: false,
   })
-  id: number;
+  id: string;
 
   @Column({
     type: DataType.STRING,

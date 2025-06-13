@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class CreatePropriedadeDto {
   @IsNotEmpty()
-  @IsNumber()
-  produtorId: number;
+  @IsUUID()
+  produtorId: string;
 
   @IsNotEmpty()
   @IsString()

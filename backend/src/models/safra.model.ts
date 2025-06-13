@@ -13,20 +13,20 @@ import { PlantioModel } from './plantio.model'; // Será criado
 @Table({ tableName: 'safras', timestamps: true })
 export class SafraModel extends Model<SafraModel> {
   @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
+    defaultValue: DataType.UUIDV4, // Adicionado para gerar UUID automaticamente
     primaryKey: true,
     field: 'id',
   })
-  id: number;
+  id: string; // Alterado de number para string
 
   @ForeignKey(() => PropriedadeModel)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
     allowNull: false,
     field: 'propriedadeid',
   })
-  propriedadeId: number;
+  propriedadeId: string; // Alterado de number para string
 
   @BelongsTo(() => PropriedadeModel)
   propriedade: PropriedadeModel;

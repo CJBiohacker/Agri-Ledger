@@ -14,6 +14,8 @@ import { CulturaController } from './controllers/cultura.controller';
 import { CulturaService } from './services/cultura.service';
 import { CulturaModel } from './models/cultura.model';
 import { PlantioModel } from './models/plantio.model';
+import { PlantioService } from './services/plantio.service';
+import { PlantioController } from './controllers/plantio.controller';
 
 @Module({
   imports: [
@@ -31,12 +33,14 @@ import { PlantioModel } from './models/plantio.model';
     PropriedadeController,
     SafraController,
     CulturaController,
+    PlantioController,
   ],
   providers: [
     ProdutorService,
     PropriedadeService,
     SafraService,
     CulturaService,
+    PlantioService,
   ],
 })
 export class AppModule {}

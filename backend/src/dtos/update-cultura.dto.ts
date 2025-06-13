@@ -1,11 +1,7 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateCulturaDto {
   @IsOptional()
-  @IsNumber()
-  safraId?: number;
-
-  @IsOptional()
-  @IsString()
+  @IsString({ message: 'O nome da cultura deve ser uma string.' })
   nome?: string;
 }
