@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Put,
-  Query,
 } from '@nestjs/common';
 import { CulturaService } from '../services/cultura.service';
 import { CreateCulturaDto } from '../dtos/create-cultura.dto';
@@ -22,22 +21,22 @@ export class CulturaController {
   }
 
   @Get()
-  findAll(@Query('safraId') safraId?: number) {
-    return this.culturaService.findAll(safraId);
+  findAll() {
+    return this.culturaService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id') id: string) {
     return this.culturaService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateCulturaDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateCulturaDto) {
     return this.culturaService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id') id: string) {
     return this.culturaService.remove(id);
   }
 }

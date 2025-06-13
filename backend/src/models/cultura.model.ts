@@ -4,12 +4,12 @@ import { PlantioModel } from './plantio.model';
 @Table({ tableName: 'culturas', timestamps: true })
 export class CulturaModel extends Model<CulturaModel> {
   @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
+    defaultValue: DataType.UUIDV4, // Adicionado para gerar UUID automaticamente
     primaryKey: true,
     field: 'id',
   })
-  id: number;
+  id: string; // Alterado de number para string
 
   @Column({
     type: DataType.STRING,

@@ -26,17 +26,17 @@ export class ProdutorController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id') id: string) {
     return this.produtorService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateProdutorDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateProdutorDto) {
     return this.produtorService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id') id: string) {
     return this.produtorService.remove(id);
   }
 }

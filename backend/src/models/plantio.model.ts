@@ -13,45 +13,42 @@ import { CulturaModel } from './cultura.model';
 @Table({ tableName: 'plantios', timestamps: true })
 export class PlantioModel extends Model<PlantioModel> {
   @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
+    defaultValue: DataType.UUIDV4, // Adicionado para gerar UUID automaticamente
     primaryKey: true,
     field: 'id',
   })
-  id: number;
+  id: string; // Alterado de number para string
 
   @ForeignKey(() => PropriedadeModel)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
     allowNull: false,
     field: 'propriedadeid',
   })
-  propriedadeId: number;
+  propriedadeId: string; // Alterado de number para string
 
   @BelongsTo(() => PropriedadeModel)
   propriedade: PropriedadeModel;
 
   @ForeignKey(() => SafraModel)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
     allowNull: false,
     field: 'safraid',
   })
-  safraId: number;
+  safraId: string; // Alterado de number para string
 
   @BelongsTo(() => SafraModel)
   safra: SafraModel;
 
   @ForeignKey(() => CulturaModel)
   @Column({
-    type: DataType.INTEGER,
+    type: DataType.UUID, // Alterado de INTEGER para UUID
     allowNull: false,
     field: 'culturaid',
   })
-  culturaId: number;
-
-  @BelongsTo(() => CulturaModel)
-  cultura: CulturaModel;
+  culturaId: string; // Alterado de number para string
 
   @Column({
     type: DataType.FLOAT,

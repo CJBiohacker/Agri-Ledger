@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { SafraService } from '../services/safra.service';
 import { CreateSafraDto } from '../dtos/create-safra.dto';
 import { UpdateSafraDto } from '../dtos/update-safra.dto';
@@ -13,22 +22,22 @@ export class SafraController {
   }
 
   @Get()
-  findAll(@Query('propriedadeId') propriedadeId?: number) {
+  findAll(@Query('propriedadeId') propriedadeId?: string) {
     return this.safraService.findAll(propriedadeId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id') id: string) {
     return this.safraService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateSafraDto) {
+  update(@Param('id') id: string, @Body() dto: UpdateSafraDto) {
     return this.safraService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id') id: string) {
     return this.safraService.remove(id);
   }
 }

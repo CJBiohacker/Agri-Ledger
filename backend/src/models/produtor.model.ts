@@ -6,6 +6,8 @@ import {
   Table,
   PrimaryKey,
   Default,
+  BeforeCreate,
+  BeforeUpdate,
 } from 'sequelize-typescript';
 import { PropriedadeModel } from './propriedade.model';
 
@@ -23,7 +25,7 @@ export class ProdutorModel extends Model<ProdutorModel> {
     type: DataType.STRING,
     allowNull: false,
     unique: true,
-    field: 'cpfcnpj',
+    field: 'cpfCnpj', // Alterado de 'cpfcnpj' para 'cpfCnpj' para corresponder à migration
   })
   cpfCnpj: string;
 
@@ -37,17 +39,12 @@ export class ProdutorModel extends Model<ProdutorModel> {
   @HasMany(() => PropriedadeModel)
   propriedades: PropriedadeModel[];
 
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'createdat',
-  })
-  declare createdAt: Date;
-
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'updatedat',
-  })
-  declare updatedAt: Date;
+  // Hooks Sequelize para validação e sanitização
+  @BeforeCreate
+  @BeforeUpdate
+  static formatCpfCnpj(instance: ProdutorModel) {
+    if (instance.cpfCnpj) {
+      instance.cpfCnpj = instance.cpfCnpj.replace(/\\D/g, '');
+    }
+  }
 }
