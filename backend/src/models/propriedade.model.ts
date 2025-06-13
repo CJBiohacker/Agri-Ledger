@@ -40,35 +40,35 @@ export class PropriedadeModel extends Model<PropriedadeModel> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    field: 'cidade',
+    field: 'cidade', // Mantido para clareza, corresponde ao nome da propriedade
   })
   cidade: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    field: 'estado',
+    field: 'estado', // Mantido para clareza, corresponde ao nome da propriedade
   })
   estado: string;
 
   @Column({
     type: DataType.FLOAT,
     allowNull: false,
-    field: 'areatotal',
+    field: 'areaTotal', // CORRIGIDO de 'areatotal' para 'areaTotal'
   })
   areaTotal: number;
 
   @Column({
     type: DataType.FLOAT,
     allowNull: false,
-    field: 'areaagricultavel',
+    field: 'areaAgricultavel', // CORRIGIDO de 'areaagricultavel' para 'areaAgricultavel'
   })
   areaAgricultavel: number;
 
   @Column({
     type: DataType.FLOAT,
     allowNull: false,
-    field: 'areavegetacao',
+    field: 'areaVegetacao', // CORRIGIDO de 'areavegetacao' para 'areaVegetacao'
   })
   areaVegetacao: number;
 

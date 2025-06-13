@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config(); // Garante que as variáveis de ambiente sejam carregadas primeiro
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -8,50 +8,68 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import helmet from '@fastify/helmet';
-import rateLimit from '@fastify/rate-limit';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
 import { API_PREFIX } from './constants';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
-    { logger: ['log', 'error', 'warn', 'debug', 'verbose'] },
+    {
+      logger:
+        process.env.NODE_ENV === 'development'
+          ? ['log', 'error', 'warn', 'debug', 'verbose']
+          : ['log', 'error', 'warn'],
+    },
   );
 
-  // Middleware de log de requisições HTTP
-  app.use((req, res, next) => {
-    const start = Date.now();
-    res.on('finish', () => {
-      const ms = Date.now() - start;
-      Logger.log(
-        `${req.method} ${req.url} ${res.statusCode} - ${ms}ms`,
-        'HTTP',
-      );
-    });
-    next();
-  });
-
-  // Segurança: headers HTTP
   await app.register(helmet);
 
-  // Segurança: rate limit (exemplo: 100 req/min por IP)
-  await app.register(rateLimit, {
-    max: 100,
-    timeWindow: '1 minute',
-  });
+  // Segurança: rate limit (descomentar e configurar se necessário)
+  // import rateLimit from '@fastify/rate-limit';
+  // await app.register(rateLimit, {
+  //   max: 1000, // Ajustar conforme a necessidade
+  //   timeWindow: '1 minute',
+  // });
 
-  // Segurança: CORS restrito (ajuste origin conforme necessário)
   app.enableCors({
-    origin: [/^https?:\/\/localhost(:\d+)?$/],
+    origin: true,
     credentials: true,
   });
 
-  // Filtro global para tratamento de erros
   app.useGlobalFilters(new AllExceptionsFilter());
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
   app.setGlobalPrefix(API_PREFIX.replace('/', ''));
-  await app.listen(process.env.BACKEND_PORT ?? 3000, '0.0.0.0');
+
+  const config = new DocumentBuilder()
+    .setTitle('Agri-Ledger API')
+    .setDescription(
+      'API para gestão de produtores rurais, propriedades, safras e culturas.',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup(`${API_PREFIX}/docs`, app, document);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
+  Logger.log(
+    `🚀 Aplicação rodando em: http://localhost:${port}/${API_PREFIX}/docs`,
+    'Bootstrap',
+  );
 }
 bootstrap();

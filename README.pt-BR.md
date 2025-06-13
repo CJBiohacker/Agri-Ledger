@@ -168,12 +168,12 @@ Este modelo permite que uma `Propriedade` tenha múltiplas `Safras`, e dentro de
       DB_PASSWORD=sua_senha_db
       DB_DATABASE=agri_ledger_db
 
-      # Configurações de Segurança (exemplo)
-      JWT_SECRET=seu_segredo_jwt
-      API_KEY=sua_api_key_segura
+      # Configurações de Segurança
+      JWT_SECRET=seu_segredo_super_secreto_aqui # Alterar em produção!
+      # API_KEY=sua_api_key_segura # Se estiver usando uma API Key global adicional
       ```
 
-    _Nota: Para produção, utilize segredos gerenciados (ex: Google Secret Manager)._
+    _Nota: Para produção, utilize segredos fortes e gerenciados (ex: Google Secret Manager, AWS Secrets Manager, HashiCorp Vault). O `JWT_SECRET` é crucial para a segurança dos tokens de autenticação._
 
 4. **(Opcional) Suba o banco de dados com Docker Compose:**
 
@@ -200,104 +200,50 @@ Este modelo permite que uma `Propriedade` tenha múltiplas `Safras`, e dentro de
     npm run migration:run
     ```
 
-    Este comando criará todas as tabelas necessárias (`produtores`, `propriedades`, `safras`, `culturas`, `plantios`) com a nova estrutura.
+    Isso criará as tabelas no banco de dados conforme definido nos modelos Sequelize e nas migrations.
 
-### Rodando a Aplicação
+## Autenticação e Autorização
 
-```bash
-npm run start:dev
-```
+A API utiliza JSON Web Tokens (JWT) para autenticação e um sistema de papéis (Roles) para autorização.
 
-A aplicação estará disponível em `http://localhost:PORTA_CONFIGURADA` (ex: `http://localhost:3000`).
-A documentação Swagger da API estará acessível em `http://localhost:PORTA_CONFIGURADA/api-docs`.
+### Fluxo de Autenticação
 
-## Estrutura do Projeto (Backend)
+1. **Login**: O usuário envia credenciais (CPF/CNPJ e senha) para o endpoint `POST /auth/login`.
+   - Se as credenciais forem válidas, a API retorna um `access_token` (JWT).
+2. **Acesso a Endpoints Protegidos**: Para acessar endpoints que requerem autenticação, o cliente deve incluir o `access_token` no cabeçalho `Authorization` como um Bearer Token.
+   - Exemplo: `Authorization: Bearer <seu_access_token>`
 
-A pasta `backend` contém a aplicação NestJS:
+### Criação de Usuário e Primeiro Admin
 
-```
-backend/
-├── dist/                     # Arquivos compilados (JavaScript)
-├── node_modules/             # Dependências do projeto
-├── src/                      # Código fonte da aplicação (TypeScript)
-│   ├── main.ts               # Ponto de entrada da aplicação NestJS
-│   ├── app.module.ts         # Módulo raiz da aplicação
-│   ├── common/               # Utilitários, filtros globais, interceptors, etc.
-│   │   └── all-exceptions.filter.ts # Exemplo de filtro de exceção global
-│   ├── controllers/          # Controladores (ex: produtor.controller.ts, plantio.controller.ts)
-│   ├── services/             # Serviços com a lógica de negócio (ex: produtor.service.ts, plantio.service.ts)
-│   ├── models/               # Modelos/Entidades do Sequelize (ex: produtor.model.ts, plantio.model.ts)
-│   ├── dtos/                 # Data Transfer Objects para validação (ex: create-produtor.dto.ts, create-plantio.dto.ts)
-│   ├── database/             # Configuração do banco (orm.config.ts) e migrations (contém a migration do schema inicial)
-│   ├── interfaces/           # Interfaces TypeScript
-│   └── utils/                # Funções utilitárias
-├── test/                     # Testes automatizados
-│   ├── unit/                 # Testes unitários (services, controllers, utils)
-│   ├── integration/          # Testes de integração (e2e para as rotas)
-│   ├── mocks/                # Mocks centralizados para testes
-│   └── jest-e2e.json         # Configuração do Jest para testes e2e
-├── coverage/                 # Relatórios de cobertura de testes
-├── Dockerfile                # Define a imagem Docker para a aplicação
-├── .dockerignore             # Especifica arquivos a serem ignorados pelo Docker
-├── jest.config.js            # Configuração principal do Jest
-├── nest-cli.json             # Configuração do NestJS CLI
-├── package.json              # Metadados do projeto e dependências
-├── tsconfig.build.json       # Configuração do TypeScript para build
-└── tsconfig.json             # Configuração base do TypeScript
-```
+- O endpoint `POST /produtores` é **público**. Isso permite que novos produtores (usuários) sejam cadastrados.
+- Ao criar um produtor, pode-se especificar seus `papeis` (roles). Para criar um administrador, inclua `"admin"` na lista de papéis.
+- **Importante**: Recomenda-se que, após a criação do primeiro usuário administrador, medidas adicionais possam ser implementadas para restringir a criação de novos administradores ou até mesmo tornar o endpoint `POST /produtores` protegido, dependendo dos requisitos de segurança da aplicação em produção.
 
-## Endpoints da API (Documentação OpenAPI/Swagger)
+### Papéis (Roles)
 
-A documentação interativa completa da API, gerada com Swagger (OpenAPI), está disponível na rota `/api-docs` quando a aplicação está em execução.
-Exemplo: `http://localhost:3000/api-docs`
+Existem dois papéis principais definidos:
 
-Esta documentação detalha todos os endpoints disponíveis, seus parâmetros, corpos de requisição/resposta, modelos de dados e códigos de status.
+- `admin`: Tem acesso total a todos os recursos da API.
+- `generico`: Tem acesso limitado, geralmente a visualizar e gerenciar apenas seus próprios dados (essa granularidade fina pode ser implementada nos serviços conforme necessário).
 
-### Resumo dos Principais Endpoints
+Endpoints específicos no `ProdutorController` (e outros que vieram a ser criados) são protegidos usando `@UseGuards(JwtAuthGuard, RolesGuard)` e decorados com `@Roles(Role.Admin)` ou `@Roles(Role.Admin, Role.Generico)` para especificar quais papéis têm permissão.
 
-Todos os IDs de recursos nas rotas (ex: `/:id`) são UUIDs.
+### Segredo JWT
 
-**Produtores (`/produtores`)**
+O `JWT_SECRET` usado para assinar e verificar os tokens é configurado através de variáveis de ambiente para maior segurança, conforme especificado no arquivo `.env`.
 
-- `POST /` - Cria um novo produtor.
-- `GET /` - Lista todos os produtores.
-- `GET /:id` - Busca um produtor pelo ID.
-- `PUT /:id` - Atualiza um produtor.
-- `DELETE /:id` - Remove um produtor.
+## Documentação da API (Swagger)
 
-**Propriedades (`/propriedades`)**
+A documentação interativa da API, gerada com Swagger (OpenAPI), está disponível em `/api-docs` quando a aplicação está rodando (ex: `http://localhost:3000/api-docs`).
 
-- `POST /` - Cria uma nova propriedade (requer `produtorId`).
-- `GET /` - Lista todas as propriedades (pode incluir filtros).
-- `GET /:id` - Busca uma propriedade pelo ID (inclui produtor, safras e plantios associados).
-- `PUT /:id` - Atualiza uma propriedade.
-- `DELETE /:id` - Remove uma propriedade.
+A documentação Swagger:
 
-**Safras (`/safras`)**
-
-- `POST /` - Cria uma nova safra (requer `propriedadeId`).
-- `GET /` - Lista todas as safras (pode incluir filtros).
-- `GET /:id` - Busca uma safra pelo ID (inclui propriedade e plantios associados).
-- `PUT /:id` - Atualiza uma safra.
-- `DELETE /:id` - Remove uma safra.
-
-**Culturas (`/culturas`)**
-
-- `POST /` - Cria uma nova cultura.
-- `GET /` - Lista todas as culturas.
-- `GET /:id` - Busca uma cultura pelo ID.
-- `PUT /:id` - Atualiza uma cultura.
-- `DELETE /:id` - Remove uma cultura.
-
-**Plantios (`/plantios`)**
-
-- `POST /` - Cria um novo registro de plantio (requer `propriedadeId`, `safraId`, `culturaId`).
-- `GET /` - Lista todos os plantios (pode incluir filtros).
-- `GET /:id` - Busca um plantio pelo ID (inclui propriedade, safra e cultura associadas).
-- `PUT /:id` - Atualiza um registro de plantio.
-- `DELETE /:id` - Remove um registro de plantio.
-
-Para detalhes sobre os DTOs de requisição e resposta, e possíveis parâmetros de consulta, consulte a documentação Swagger em `/api-docs`.
+- Lista todos os endpoints disponíveis.
+- Mostra quais endpoints são protegidos e requerem autenticação (geralmente marcados com um ícone de cadeado).
+- Permite testar o fluxo de autenticação:
+  1. Use o endpoint `POST /auth/login` para obter um token.
+  2. Clique no botão "Authorize" no Swagger UI e cole o `access_token` (prefixado com `Bearer`) para autenticar suas requisições na interface.
+- Detalha os DTOs (Data Transfer Objects) para request e response bodies.
 
 ## Testes
 

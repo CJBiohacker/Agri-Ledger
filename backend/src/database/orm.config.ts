@@ -6,13 +6,13 @@ import { CulturaModel } from '../models/cultura.model';
 import { PlantioModel } from '../models/plantio.model';
 
 export const sequelizeConfig: SequelizeOptions = {
-  dialect: process.env.DB_DIALECT as any as SequelizeOptions['dialect'], // 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql'
+  dialect: process.env.DB_DIALECT as any as SequelizeOptions['dialect'],
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  logging: false,
+  logging: process.env.NODE_ENV === 'development' ? console.log : false, // Log apenas em desenvolvimento
   models: [
     ProdutorModel,
     PropriedadeModel,

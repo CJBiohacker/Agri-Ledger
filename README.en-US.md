@@ -1,9 +1,11 @@
 # Agri-Ledger API
 
 ## Overview
+
 The Agri-Ledger API is the backend for a management system for rural producers, their properties, harvests, and crops. The goal is to provide a robust, scalable, and secure platform for recording and managing agricultural information, facilitating traceability and decision-making.
 
 ## Technologies Used
+
 - **Backend:** Node.js, NestJS, TypeScript
 - **Database:** PostgreSQL
 - **ORM:** Sequelize
@@ -14,7 +16,9 @@ The Agri-Ledger API is the backend for a management system for rural producers, 
 - **API Documentation:** Swagger (OpenAPI) via `@nestjs/swagger`
 
 ## Architecture
+
 The API follows a layered architecture, common in NestJS applications, promoting separation of concerns and modularity:
+
 - **Controllers:** Responsible for handling HTTP requests, validating input data (using DTOs), and returning responses.
 - **Services:** Contain the core business logic of the application.
 - **Models/Repositories:** Data access layer, using Sequelize to interact with the PostgreSQL database.
@@ -121,235 +125,200 @@ This model allows a `Property` to have multiple `Plantings`. Each `Planting` lin
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (version >= 18.x recommended)
 - Yarn or NPM
 - Docker and Docker Compose (for development environment with database)
 - PostgreSQL (if not using Docker for the database)
 
 ### Environment Setup
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-user/agri-ledger.git
-    cd agri-ledger/backend
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    # or
-    # yarn install
-    ```
-3.  **Configure environment variables:**
-    - Copy the `.env.example` file (if it exists) to `.env` in the `backend` folder.
-    - Fill in the necessary environment variables, such as:
-      ```env
-      # Application Settings
-      PORT=3000
-      NODE_ENV=development
 
-      # PostgreSQL Database Settings with Sequelize
-      DB_DIALECT=postgres
-      DB_HOST=localhost
-      DB_PORT=5432
-      DB_USERNAME=your_db_user
-      DB_PASSWORD=your_db_password
-      DB_DATABASE=agri_ledger_db
+1. **Clone the repository:**
 
-      # Security Settings (example)
-      JWT_SECRET=your_jwt_secret
-      API_KEY=your_secure_api_key
-      ```
-    *Note: For production, use managed secrets (e.g., Google Secret Manager).*
+   ```bash
+   git clone https://github.com/your-user/agri-ledger.git
+   cd agri-ledger/backend
+   ```
 
-4.  **(Optional) Start the database with Docker Compose:**
-    If a `docker-compose.yml` is configured for the database:
-    ```bash
-    docker-compose up -d postgres_db # Replace 'postgres_db' with the database service name in docker-compose.yml
-    ```
-    Otherwise, ensure a PostgreSQL instance is running and accessible.
+2. **Install dependencies:**
 
-5.  **Run Sequelize migrations (if configured):**
-    ```bash
-    npm run migration:run
-    ```
+   ```bash
+   npm install
+   # or
+   # yarn install
+   ```
 
-### Running the Application
-```bash
-npm run start:dev
-```
-The application will be available at `http://localhost:CONFIGURED_PORT` (e.g., `http://localhost:3000`).
-The API's Swagger documentation will be accessible at `http://localhost:CONFIGURED_PORT/api-docs`.
+3. **Configure environment variables:**
 
-## Project Structure (Backend)
-The `backend` folder contains the NestJS application:
-```
-backend/
-├── dist/                     # Compiled files (JavaScript)
-├── node_modules/             # Project dependencies
-├── src/                      # Source code (TypeScript)
-│   ├── main.ts               # NestJS application entry point
-│   ├── app.module.ts         # Root application module
-│   ├── common/               # Utilities, global filters, interceptors, etc.
-│   │   └── all-exceptions.filter.ts # Example of a global exception filter
-│   ├── controllers/          # Controllers (e.g., producer.controller.ts)
-│   ├── services/             # Services with business logic
-│   ├── models/               # Sequelize Models/Entities
-│   ├── dtos/                 # Data Transfer Objects for validation
-│   ├── database/             # Database configuration (orm.config.ts) and migrations
-│   ├── interfaces/           # TypeScript interfaces
-│   └── utils/                # Utility functions
-├── test/                     # Automated tests
-│   ├── unit/                 # Unit tests (services, controllers, utils)
-│   ├── integration/          # Integration tests (e2e for routes)
-│   ├── mocks/                # Centralized mocks for tests
-│   └── jest-e2e.json         # Jest configuration for e2e tests
-├── coverage/                 # Test coverage reports
-├── Dockerfile                # Defines the Docker image for the application
-├── .dockerignore             # Specifies files to be ignored by Docker
-├── jest.config.js            # Main Jest configuration
-├── nest-cli.json             # NestJS CLI configuration
-├── package.json              # Project metadata and dependencies
-├── tsconfig.build.json       # TypeScript configuration for build
-└── tsconfig.json             # Base TypeScript configuration
-```
+   - Copy the `.env.example` file (if it exists) to `.env` in the `backend` folder.
+   - Fill in the necessary environment variables, such as:
 
-## API Endpoints (OpenAPI/Swagger Documentation)
+     ```env
+     # Application Settings
+     PORT=3000
+     NODE_ENV=development
 
-The complete interactive API documentation, generated with Swagger (OpenAPI), is available at the `/api-docs` route when the application is running.
-Example: `http://localhost:3000/api-docs` (replace 3000 with your configured port if different).
+     # PostgreSQL Database Settings with Sequelize
+     DB_DIALECT=postgres
+     DB_HOST=localhost
+     DB_PORT=5432
+     DB_USERNAME=your_db_user
+     DB_PASSWORD=your_db_password
+     DB_DATABASE=agri_ledger_db
 
-This documentation is automatically generated by NestJS (using `@nestjs/swagger`) based on the decorators in the controllers and DTOs. It details all available endpoints, their parameters, request/response bodies, data models, and status codes.
+     # Security Settings
+     JWT_SECRET=your_super_secret_key_here # Change in production!
+     # API_KEY=your_secure_api_key # If using an additional global API Key
+     ```
 
-### Summary of Main Endpoints
+   *Note: For production, use strong, managed secrets (e.g., Google Secret Manager, AWS Secrets Manager, HashiCorp Vault). The `JWT_SECRET` is crucial for the security of authentication tokens.*
 
-All resource IDs in routes (e.g., `/:id`) are UUIDs.
+4. **(Optional) Start the database with Docker Compose:**
 
-**Producers (`/producers`)**
+   If a `docker-compose.yml` is configured for the database:
 
-- `POST /` - Creates a new producer.
-- `GET /` - Lists all producers.
-- `GET /:id` - Retrieves a producer by ID.
-- `PUT /:id` - Updates a producer.
-- `DELETE /:id` - Removes a producer.
+   ```bash
+   docker-compose up -d postgres_db # Replace 'postgres_db' with the database service name in docker-compose.yml
+   ```
 
-**Properties (`/properties`)**
+   Otherwise, ensure a PostgreSQL instance is running and accessible.
 
-- `POST /` - Creates a new property (requires `producerId`).
-- `GET /` - Lists all properties (may include filters).
-- `GET /:id` - Retrieves a property by ID (can be expanded to include associated producer, and its plantings).
-- `PUT /:id` - Updates a property.
-- `DELETE /:id` - Removes a property.
+5. **Run Sequelize migrations (if configured):**
 
-**Harvests (`/harvests`)**
+   ```bash
+   npm run migration:run
+   ```
 
-- `POST /` - Creates a new harvest period.
-- `GET /` - Lists all harvest periods.
-- `GET /:id` - Retrieves a harvest period by ID.
-- `PUT /:id` - Updates a harvest period.
-- `DELETE /:id` - Removes a harvest period.
+   This will create the tables in the database as defined in the Sequelize models and migrations.
 
-**Crops (`/crops`)**
+## Authentication and Authorization
 
-- `POST /` - Creates a new crop type.
-- `GET /` - Lists all crop types.
-- `GET /:id` - Retrieves a crop type by ID.
-- `PUT /:id` - Updates a crop type.
-- `DELETE /:id` - Removes a crop type.
+The API uses JSON Web Tokens (JWT) for authentication and a role-based system for authorization.
 
-**Plantings (`/plantings`)**
+### Authentication Flow
 
-- `POST /` - Creates a new planting record (requires `propertyId`, `harvestId`, `cropId`).
-- `GET /` - Lists all plantings (may include filters by property, harvest, or crop).
-- `GET /:id` - Retrieves a planting by ID (includes associated property, harvest, and crop).
-- `PUT /:id` - Updates a planting record.
-- `DELETE /:id` - Removes a planting record.
+1. **Login**: The user sends credentials (CPF/CNPJ and password) to the `POST /auth/login` endpoint.
+   - If the credentials are valid, the API returns an `access_token` (JWT).
+2. **Accessing Protected Endpoints**: To access endpoints that require authentication, the client must include the `access_token` in the `Authorization` header as a Bearer Token.
+   - Example: `Authorization: Bearer <your_access_token>`
 
-For details on request and response DTOs, and possible query parameters, please refer to the live Swagger documentation at `/api-docs`.
+### User Creation and First Admin
 
-## Tests
+- The `POST /producers` endpoint is **public**. This allows new producers (users) to be registered.
+- When creating a producer, their `roles` can be specified. To create an administrator, include `"admin"` in the list of roles.
+- **Important**: It is recommended that after creating the first administrator user, additional measures be implemented to restrict the creation of new administrators or even protect the `POST /producers` endpoint, depending on the application's security requirements in production.
+
+### Roles
+
+Two main roles are defined:
+
+- `admin`: Has full access to all API resources.
+- `generic`: Has limited access, typically to view and manage only their own data (this fine-grained control can be implemented in the services as needed).
+
+Specific endpoints in the `ProdutorController` (and others that may be created) are protected using `@UseGuards(JwtAuthGuard, RolesGuard)` and decorated with `@Roles(Role.Admin)` or `@Roles(Role.Admin, Role.Generic)` to specify which roles have permission.
+
+### JWT Secret
+
+The `JWT_SECRET` used to sign and verify tokens is configured via environment variables for enhanced security, as specified in the `.env` file.
+
+## API Documentation (Swagger)
+
+Interactive API documentation, generated with Swagger (OpenAPI), is available at `/api-docs` when the application is running (e.g., `http://localhost:3000/api-docs`).
+
+The Swagger documentation:
+
+- Lists all available endpoints.
+- Shows which endpoints are protected and require authentication (usually marked with a lock icon).
+- Allows testing the authentication flow:
+  1. Use the `POST /auth/login` endpoint to obtain a token.
+  2. Click the "Authorize" button in the Swagger UI and paste the `access_token` (prefixed with `Bearer`) to authenticate your requests within the interface.
+- Details the DTOs (Data Transfer Objects) for request and response bodies.
+
+## Testing
+
 The project uses Jest for unit and integration tests.
+
 - **Run all tests (unit and e2e):**
+
   ```bash
-  npm run test
+  npm test
   ```
-- **Run tests and generate coverage report:**
+
+- **Run only unit tests:**
+
   ```bash
-  npm run test:cov
+  npm run test:unit
   ```
-  The coverage report will be generated in the `coverage/lcov-report/index.html` folder.
-- **Run only integration (e2e) tests:**
+
+- **Run only e2e tests:**
+
   ```bash
   npm run test:e2e
   ```
-- **Run only unit tests:**
-  (May require configuring a specific script or using Jest CLI directly)
+
+- **Run tests with coverage:**
+
   ```bash
-  npm run test:unit # If configured in package.json, or:
-  # jest --config jest.config.js src # Example, adjust as needed
+  npm run test:cov
   ```
 
-## Build and Deploy
-
 ### Build with Docker
-1.  Navigate to the `backend` folder.
-2.  Build the Docker image:
-    ```bash
-    docker build -t agri-ledger-api:latest .
-    ```
+
+1. Navigate to the `backend` folder.
+2. Build the Docker image:
+
+   ```bash
+   docker build -t agri-ledger-api .
+   ```
 
 ### Deploy on Google Cloud Run
-1.  **Authenticate with Google Cloud:**
-    ```bash
-    gcloud auth login
-    gcloud auth configure-docker
-    ```
-2.  **Set your Google Cloud Project ID:**
-    ```bash
-    export PROJECT_ID="your-gcp-project-id"
-    gcloud config set project $PROJECT_ID
-    ```
-3.  **Build and push the image to Artifact Registry (or Container Registry):**
-    (Assuming you have a Docker repository named `agri-ledger-repo` in the `us-central1` region)
-    ```bash
-    docker tag agri-ledger-api:latest us-central1-docker.pkg.dev/$PROJECT_ID/agri-ledger-repo/agri-ledger-api:latest
-    docker push us-central1-docker.pkg.dev/$PROJECT_ID/agri-ledger-repo/agri-ledger-api:latest
-    ```
-4.  **Deploy to Cloud Run:**
-    ```bash
-    gcloud run deploy agri-ledger-service \
-      --image us-central1-docker.pkg.dev/$PROJECT_ID/agri-ledger-repo/agri-ledger-api:latest \
-      --platform managed \
-      --region us-central1 \
-      --allow-unauthenticated \
-      --port 8080 \ # Port exposed by Cloud Run, Dockerfile should expose app port (e.g., 3000)
-      --set-env-vars NODE_ENV=production,PORT=3000,DB_HOST=...,DB_PORT=...,DB_USERNAME=...,DB_PASSWORD=...,DB_DATABASE=... # And other environment variables
-    ```
-    *Important: For `DB_HOST` in Cloud Run, configure the Cloud SQL instance IP or use the Cloud SQL Connection Socket. Passwords and secrets should be managed via Secret Manager and referenced in Cloud Run environment variables.*
+
+1. **Authenticate with Google Cloud:**
+
+   ```bash
+   gcloud auth login
+   gcloud auth configure-docker
+   ```
+
+2. **Set your Google Cloud Project ID:**
+
+   ```bash
+   gcloud config set project YOUR_PROJECT_ID
+   ```
+
+3. **Build and push the image to Artifact Registry (or Container Registry):**
+
+   ```bash
+   docker tag agri-ledger-api gcr.io/YOUR_PROJECT_ID/agri-ledger-api
+   docker push gcr.io/YOUR_PROJECT_ID/agri-ledger-api
+   ```
+
+4. **Deploy to Cloud Run:**
+
+   ```bash
+   gcloud run deploy agri-ledger-api --image gcr.io/YOUR_PROJECT_ID/agri-ledger-api --platform managed --region YOUR_REGION --allow-unauthenticated
+   ```
 
 ## Useful Scripts (defined in `package.json`)
+
 - `npm run build`: Compiles TypeScript code to JavaScript.
 - `npm run format`: Formats code using Prettier.
-- `npm run start`: Runs the application in production mode (after build).
-- `npm run start:dev`: Runs the application in development mode with watch (nodemon).
-- `npm run start:debug`: Runs the application in debug mode with watch.
-- `npm run lint`: Runs ESLint for static code analysis.
-- `npm run test`: Runs all tests.
-- `npm run test:watch`: Runs tests in watch mode.
-- `npm run test:cov`: Runs tests and generates coverage report.
-- `npm run test:debug`: Runs tests in debug mode.
-- `npm run test:e2e`: Runs e2e tests specifically.
-- `npm run migration:generate <path/to/MigrationName>`: Generates a new Sequelize migration file (e.g., `npm run migration:generate src/database/migrations/CreateUsersTable`).
-- `npm run migration:run`: Applies pending migrations to the database.
-- `npm run migration:revert`: Reverts the last applied migration.
+- `npm run lint`: Lints code using ESLint.
+- `npm run start`: Starts the application (for production).
+- `npm run start:dev`: Starts the application in development mode with hot-reloading.
+- `npm run start:prod`: Starts the application from compiled files (for production testing).
+- `npm run migration:generate src/database/migrations/YourMigrationName`: Generates a new migration file.
+- `npm run migration:run`: Runs all pending migrations.
+- `npm run migration:revert`: Reverts the last executed migration.
 
 ## Contribution
-Contributions are welcome! Please follow these guidelines:
-1.  Fork the project.
-2.  Create a branch for your feature (`git checkout -b feature/new-feature`).
-3.  Commit your changes (`git commit -am 'Add new feature'`).
-4.  Push to the branch (`git push origin feature/new-feature`).
-5.  Open a Pull Request.
 
-Ensure that tests pass and that the code follows linting standards.
+1. Fork the project.
+2. Create a branch for your feature (`git checkout -b feature/new-feature`).
+3. Commit your changes (`git commit -am 'Add new feature'`).
+4. Push to the branch (`git push origin feature/new-feature`).
+5. Open a Pull Request.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file at the project root for more details.
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
