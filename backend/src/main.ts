@@ -10,6 +10,7 @@ import {
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
+import { API_PREFIX } from './constants';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -35,7 +36,7 @@ async function bootstrap() {
   // Filtro global para tratamento de erros
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  app.setGlobalPrefix('agriledger-api');
+  app.setGlobalPrefix(API_PREFIX.replace('/', ''));
   await app.listen(process.env.BACKEND_PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();
