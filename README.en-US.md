@@ -54,7 +54,6 @@ erDiagram
 
     HARVESTS {
         UUID id PK
-        // UUID propertyId FK // Removed direct link, managed through PLANTINGS
         String name
         Date startDate
         Date endDate
