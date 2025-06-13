@@ -5,12 +5,12 @@ import { SafraModel } from '../models/safra.model';
 import { CulturaModel } from '../models/cultura.model';
 
 export const sequelizeConfig: SequelizeOptions = {
-  dialect: 'postgres',
+  dialect: process.env.DB_DIALECT as any as SequelizeOptions['dialect'], // 'mysql' | 'postgres' | 'sqlite' | 'mariadb' | 'mssql'
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
-  username: process.env.DB_USER,
+  username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  database: process.env.DB_DATABASE,
   logging: false,
   models: [ProdutorModel, PropriedadeModel, SafraModel, CulturaModel],
   sync: { force: false }, // Cria tabelas se não existirem (não apaga dados)
